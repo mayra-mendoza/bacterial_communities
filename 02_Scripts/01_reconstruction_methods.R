@@ -11,7 +11,7 @@ rzcompositiondata <- read.csv("01_RawData/rzcomposition.csv")
 
 #### Function ####
 # Function for selecting specific columns based on the community sample 
-community_isolation <- function(rcommunities, sample, sample_col, rcommunities_col, df, arrangev, interest_column, dfwvals){
+community_isolation <- function(rcommunities, sample, sample_col, rcommunities_col, df, arrangev, interest_column, dfwvals, composition){
 
    library(dplyr)
 # create an empty list   
@@ -44,7 +44,31 @@ for (id in seq_along(community_list)) {
   
 }
 
-return(abundances_tables)
+abnds_filtered <- list()
+
+for (g in seq_len(ncol(composition))) {
+  
+  # select the community name / for arranging the list 
+  comm_name <- colnames(composition)[g]
+  
+  # select the specific bacterial id for the selected community 
+  spp <- composition[, g]
+  spln <- 1:length(spp)
+  # indexes [to select in the list of data.frames]
+  idx <- (2*g - 1):(2*g)
+  
+  for (j in seq_along(idx)) {
+    
+    k <- idx[j]
+    
+    abnds_filtered[[paste0(comm_name, "_", sample[j])]] <- abundances_tables[[k]] %>% 
+      filter(row.names(abundances_tables[[k]]) %in% spp)
+    
+    
+  }
+}
+
+return(abnds_filtered)
 
 }
 
@@ -64,14 +88,14 @@ rz_communities <- community_isolation(rcommunities = comms_rhiz , sample = temps
 
 # isolated "for loops" to subset the data.frames #
 
-community_list <- list()
+rz_list_not_filtered <- list()
 k <- 1
 # subset the commuinity values based on the day and community name 
 
 for (i in 1:length(comms_rhiz)){
   for (x in 1:length(temps_rhiz)){
     
-    community_list[[k]] <- subset(metadata, temp %in% c(0, temps_rhiz[x])  & community == comms_rhiz[i]) %>% 
+    rz_list_not_filtered [[k]] <- subset(metadata, temp %in% c(0, temps_rhiz[x])  & community == comms_rhiz[i]) %>% 
       arrange(day) %>% 
       pull(label) %>% 
       as.character()
@@ -81,17 +105,17 @@ for (i in 1:length(comms_rhiz)){
 }
 
 # create an empty list for the abundances 
-abundances_tables <- list()
+abundances_rz_not_filtered <- list()
 
 # Based on the column names, select the values from f_clean 
-for (id in seq_along(community_list)) {
-  abundances_tables[[id]] <- f_clean %>%
-    dplyr::select(1 | all_of(community_list[[id]]) )  %>%
+for (id in seq_along(rz_list_not_filtered)) {
+  abundances_rz_not_filtered[[id]] <- f_clean %>%
+    dplyr::select(1 | all_of(rz_list_not_filtered[[id]]) )  %>%
     column_to_rownames(var = "row.names")
 }
 
 # filter the list of data.frames based on the community composition 
-abnds_filtered <- list()
+rz_filtered <- list()
 
 for (g in seq_len(ncol(rzcompositiondata))) {
   
@@ -108,8 +132,8 @@ for (g in seq_len(ncol(rzcompositiondata))) {
     
     k <- idx[j]
     
-    abnds_filtered[[paste0(comm_name, "_", temps_rhiz[j])]] <- abundances_tables[[k]] %>% 
-      filter(row.names(abundances_tables[[k]]) %in% spp)
+    rz_filtered[[paste0(comm_name, "_", temps_rhiz[j])]] <- abundances_rz_not_filtered[[k]] %>% 
+      filter(row.names(abundances_rz_not_filtered[[k]]) %in% spp)
 
     
   }
