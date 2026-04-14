@@ -3,9 +3,13 @@
 
 library(readr)
 library(mlBioNets)
+library(dplyr)
+library(tibble)
+
 
 # Load csv archives 
 metadata <- as.data.frame(read_tsv(file = "01_RawData/metadata_clean.tsv"))
+metadata[is.na(metadata)] <- 0
 f_clean <- as.data.frame(read_tsv("01_RawData/f_clean.tsv"))
 rzcompositiondata <- read.csv("01_RawData/rzcomposition.csv")
 
@@ -73,9 +77,6 @@ return(abnds_filtered)
 }
 
 ## Function testing 
-# Change the NA values in the data frame (for a correct functioning of the subsetting function)
-metadata[is.na(metadata)] <- 0
-
 comms_rhiz <- unique(metadata$community) # to use all the community values for subsetting the df 
 temps_rhiz <- c(28, 32) # without the 0 temperature, because it is already being used in the function 
 
@@ -103,7 +104,7 @@ for (i in 1:length(comms_rhiz)){
     k <- k + 1
   }
 }
-
+rz_list_not_filtered
 # create an empty list for the abundances 
 abundances_rz_not_filtered <- list()
 
@@ -139,12 +140,92 @@ for (g in seq_len(ncol(rzcompositiondata))) {
   }
 }
 
-abnds_filtered
+rz_filtered 
 
 ##### Testing network inference algortihms ####
 
-# aracne - exploring the method and specifically the network generated for R11 (we only have one sample)
-R1_0_inference <- net_inference(taxa_abs = t(abundances_tables[[1]]), method = "aracne")
-plot(R1_0_inference)
-R11_3_inference <- net_inference(taxa_abs = t(abundances_tables[[44]]), method = "aracne")               
-plot(R11_3_inference)
+#### SPARCc ####
+
+# R1
+R1_28_inference <- net_inference(taxa_abs = t(rz_filtered[[1]]), method = "sparcc", p = 0.5)
+plot(R1_28_inference)
+
+R1_32_inference <- net_inference(taxa_abs = t(rz_filtered[[2]]), method = "sparcc", p = 0.5)
+plot(R1_32_inference)
+
+# R2
+R2_28_inference <- net_inference(taxa_abs = t(rz_filtered[[3]]), method = "sparcc", p = 0.5)
+plot(R2_28_inference)
+
+R2_32_inference <- net_inference(taxa_abs = t(rz_filtered[[4]]), method = "sparcc", p = 0.5)
+plot(R2_32_inference )
+
+# R3
+R3_28_inference <- net_inference(taxa_abs = t(rz_filtered[[5]]), method = "sparcc", p = 0.5)
+plot(R3_28_inference)
+
+R3_32_inference <- net_inference(taxa_abs = t(rz_filtered[[6]]), method = "sparcc", p = 0.5)
+plot(R3_32_inference)
+
+# R4
+R4_28_inference <- net_inference(taxa_abs = t(rz_filtered[[7]]), method = "sparcc", p = 0.5)
+plot(R4_28_inference)
+
+R4_32_inference <- net_inference(taxa_abs = t(rz_filtered[[8]]), method = "sparcc", p = 0.5)
+plot(R4_32_inference)
+
+# R5
+R5_28_inference <- net_inference(taxa_abs = t(rz_filtered[[9]]), method = "sparcc", p = 0.5)
+plot(R5_28_inference)
+
+R5_32_inference <- net_inference(taxa_abs = t(rz_filtered[[10]]), method = "sparcc", p = 0.5)
+plot(R5_32_inference)
+
+# R6
+R6_28_inference <- net_inference(taxa_abs = t(rz_filtered[[11]]), method = "sparcc", p = 0.5)
+plot(R6_28_inference)
+
+R6_32_inference <- net_inference(taxa_abs = t(rz_filtered[[12]]), method = "sparcc", p = 0.5)
+plot(R6_32_inference)
+
+# R7
+R7_28_inference <- net_inference(taxa_abs = t(rz_filtered[[13]]), method = "sparcc", p = 0.5)
+plot(R7_28_inference )
+
+R7_32_inference <- net_inference(taxa_abs = t(rz_filtered[[14]]), method = "sparcc", p = 0.5)
+plot(R7_32_inference)
+
+# R8
+R8_28_inference <- net_inference(taxa_abs = t(rz_filtered[[15]]), method = "sparcc", p = 0.5)
+plot(R8_28_inference)
+
+R8_32_inference <- net_inference(taxa_abs = t(rz_filtered[[16]]), method = "sparcc", p = 0.5)
+plot(R8_32_inference)
+
+# R9
+R9_28_inference <- net_inference(taxa_abs = t(rz_filtered[[17]]), method = "sparcc", p = 0.5)
+plot(R9_28_inference)
+
+R9_32_inference <- net_inference(taxa_abs = t(rz_filtered[[18]]), method = "sparcc", p = 0.5)
+plot(R9_32_inference)
+
+# R10
+R10_28_inference <- net_inference(taxa_abs = t(rz_filtered[[19]]), method = "sparcc", p = 0.5)
+plot(R10_28_inference)
+
+R10_32_inference <- net_inference(taxa_abs = t(rz_filtered[[20]]), method = "sparcc", p = 0.5)
+plot(R10_32_inference)
+
+# R11
+R11_28_inference <- net_inference(taxa_abs = t(rz_filtered[[21]]), method = "sparcc", p = 0.5)
+plot(R11_28_inference)
+
+R11_32_inference <- net_inference(taxa_abs = t(rz_filtered[[22]]), method = "sparcc", p = 0.5)
+plot(R11_32_inference)
+
+# R12
+R12_28_inference <- net_inference(taxa_abs = t(rz_filtered[[23]]), method = "sparcc", p = 0.5)
+plot(R12_28_inference)
+
+R12_32_inference <- net_inference(taxa_abs = t(rz_filtered[[24]]), method = "sparcc", p = 0.5)
+plot(R12_32_inference)
