@@ -147,15 +147,6 @@ log_CH23_df <- list(
   
 )
 
-CH23_init <- function() {
-  list(
-    r = 0.3,
-    k = 0.8,
-    z0 = as.numeric(y0),
-    sigma = 0.1
-  )
-}
-
 log_CH23fit <- stan(model_code = loglv, 
                     data = log_CH23_df,
                     save_dso = FALSE, 
