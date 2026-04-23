@@ -3,6 +3,7 @@
 
 library (bayesplot)
 library(ggplot2)
+library(hexbin)
 
 # To do list: 
 # * bayesplot - pairs 
@@ -29,9 +30,8 @@ CH29_allist <- list( CH29_T30_10t = CH29_30_10,
 
 stan_toutputs <- append(stan_out_allbut, CH29_allist)
 
-# r (& k) * iter graph -------------------------------------------------------------------
+# TRACE GRAPHS -------------------------------------------------------------------
 # Ref: https://mc-stan.org/rstan/reference/stanfit-method-plot.html
-
 
 # mcmc_trace ----------------------------------------------------------------
 pdf("03_Output/Traceplots_CCStrains.pdf", width = 15, height = 7)
@@ -71,3 +71,78 @@ for (i in 1:length(stan_toutputs)){
 }
 
 dev.off()
+
+
+# PAIRS GRAPHS -------------------------------------------------------------------
+
+# pairs func -------------------------------------------------------------------
+pdf("03_Output/Pairsplots_pairsfun.pdf", width = 15, height = 7)
+
+for (i in 1:length(stan_toutputs)){
+  # Strain for title 
+  strain <- names(stan_toutputs)[i]
+  
+  color_scheme_set("purple")
+  # adding title to each plot 
+  x <- pairs(stan_toutputs[[i]], pars = c("r", "k", "sigma"), gap = 0, 
+             main = paste0("Pairs plot_", strain), pch = 16, cex = 0.5) 
+  
+  print(x)
+}
+
+dev.off()
+
+
+# mcmc_pairs fun ----------------------------------------------------------------
+
+pdf("03_Output/Pairsplots_mcmcfun.pdf", width = 15, height = 7 , onefile = TRUE)
+
+for (i in 1:length(stan_toutputs)){
+  # Strain for title 
+  strain <- names(stan_toutputs)[i]
+  pst_cp2 <- as.array(stan_toutputs[[i]])
+  
+  color_scheme_set("brightblue")
+  # adding title to each plot 
+  x <- mcmc_pairs(pst_cp2, pars = c("r", "k", "sigma"),
+                  diag_fun = "hist", off_diag_fun = "hex",
+                  condition = pairs_condition(chains = list(1, 2:4)), 
+                  grid_args = list(top = paste("Pairs plot:", strain))) 
+  
+  print(x)
+}
+
+dev.off()
+
+
+# r & k values -----------------------------------------------------------------
+
+lista_r <- lapply(names(stan_toutputs), function(nm) {
+  # 
+  
+  draws <- as_draws_df(stan_toutputs[[nm]]) %>%
+    select(r) %>% # select the r value in each spp 
+    mutate(ID = nombre) # keep the name 
+  return(draws)
+})
+
+# Bind all the rows in the object and make two columns one for each variable 
+df_boxplot <- bind_rows(lista_r) %>% 
+separate(ID, into = c("Strain", "Temperature"), sep = "_T") 
+
+df_boxplot <- df_boxplot %>%
+  mutate(
+
+      # generate a new "sampling_times column 
+      sampling_times = case_when(
+      str_detect(Temperature, "_6t")  ~ 6, # for the CH29 special cases 
+      str_detect(Temperature, "_10t") ~ 10,
+      TRUE                           ~ 10
+    ),
+    # to clean the temperature column 
+    Temperature = str_replace_all(Temperature, "_6t|_10t", "")
+  )
+
+df_boxplot$Temperature <- as.numeric(df_boxplot$Temperature)
+
+
